@@ -22,23 +22,44 @@ New here? Read them in order. Already integrating? Jump to page 3.
 ## The whole thing in one picture
 
 ```mermaid
-flowchart LR
-    A[Your App] -->|1. initiateDeviceRegistration| S[Face Auth SDK]
-    S -->|registration payload| A
-    A -->|2. send payload| B[Your AUA Server]
-    B -->|signed approval| A
-    A -->|3. completeDeviceRegistration| S
-    A -->|4. init| S
-    A -->|5. startAuthentication| S
-    S -->|camera + liveness + match| S
-    S -->|6. PID block / result| A
-    A -->|7. send PID| B
-    B -->|Aadhaar auth request| U[UIDAI]
+sequenceDiagram
+    autonumber
+    participant App as 📱 Your App
+    participant SDK as 🙂 Face Auth SDK
+    participant AUA as 🖥️ Your AUA Server
+    participant UIDAI as 🏛️ UIDAI
+
+    rect rgba(120, 160, 255, 0.12)
+    Note over App,AUA: Once per phone — Registration
+    App->>SDK: initiateDeviceRegistration()
+    SDK-->>App: registration payload
+    App->>AUA: payload
+    AUA-->>App: signed approval
+    App->>SDK: completeDeviceRegistration()
+    end
+
+    rect rgba(120, 200, 140, 0.12)
+    Note over App,SDK: Once per app launch
+    App->>SDK: init()
+    SDK-->>App: onReady
+    end
+
+    rect rgba(255, 180, 90, 0.14)
+    Note over App,UIDAI: Every authentication
+    App->>SDK: startAuthentication()
+    Note right of SDK: camera + liveness
+    SDK-->>App: PID block
+    App->>AUA: PID block
+    AUA->>UIDAI: Aadhaar auth request
+    UIDAI-->>AUA: Yes / No
+    end
 ```
 
-**Steps 1–3 happen only once per phone** (registration).
-**Step 4 happens once per app launch.**
-**Steps 5–7 happen every time a user authenticates.**
+| Colour | When it happens | Steps |
+|---|---|---|
+| 🔵 Blue | **Once per phone** (registration) | 1 – 5 |
+| 🟢 Green | **Once per app launch** | 6 – 7 |
+| 🟠 Orange | **Every time a user authenticates** | 8 – 12 |
 
 ---
 
