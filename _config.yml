@@ -1,0 +1,9 @@
+title: Face Auth SDK
+description: Integration guide for the UIDAI Face Auth SDK for Android
+theme: jekyll-theme-primer
+plugins:
+  - jekyll-relative-links
+  - jekyll-readme-index
+relative_links:
+  enabled: true
+  collections: false
