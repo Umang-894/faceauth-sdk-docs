@@ -1,3 +1,7 @@
+---
+title: "1. Before you start"
+---
+
 [← Home](README.md) · **1. Prerequisites** · [2. Audit checklist](2-audit-checklist.md) · [3. API guide](3-api-guide.md) · [4. Error codes](4-error-codes.md)
 
 # 1. Before you start (AUA prerequisites)

@@ -1,3 +1,7 @@
+---
+title: "2. Audit checklist"
+---
+
 [← Home](README.md) · [1. Prerequisites](1-prerequisites.md) · **2. Audit checklist** · [3. API guide](3-api-guide.md) · [4. Error codes](4-error-codes.md)
 
 # 2. Audit checklist

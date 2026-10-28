@@ -1,3 +1,7 @@
+---
+title: "4. Error codes"
+---
+
 [← Home](README.md) · [1. Prerequisites](1-prerequisites.md) · [2. Audit checklist](2-audit-checklist.md) · [3. API guide](3-api-guide.md) · **4. Error codes**
 
 # 4. Error codes

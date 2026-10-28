@@ -1,3 +1,7 @@
+---
+title: "3. API guide"
+---
+
 [← Home](README.md) · [1. Prerequisites](1-prerequisites.md) · [2. Audit checklist](2-audit-checklist.md) · **3. API guide** · [4. Error codes](4-error-codes.md)
 
 # 3. API guide
