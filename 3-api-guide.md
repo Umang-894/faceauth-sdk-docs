@@ -120,7 +120,7 @@ FaceAuthSDK.init(
 
 The first time, `init()` downloads the face model (a few MB). After that it's fast.
 
-<details>
+<details markdown="1">
 <summary>Want to show a progress bar? (optional)</summary>
 
 Pass an `InitializationProgressCallback`:

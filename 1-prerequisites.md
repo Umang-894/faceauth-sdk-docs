@@ -56,12 +56,45 @@ The SDK checks the last row by itself — see the [Audit checklist](2-audit-chec
 
 ## D. Your Android project
 
+The SDK is built and tested with the versions below. Use the same or newer in your app.
+
 | Need | Value |
 |---|---|
-| `minSdk` | 28 |
-| `compileSdk` | 37 (or the latest your Android Gradle Plugin supports) |
-| Java / Kotlin target | 11 or above |
+| `minSdk` | **28** (Android 9) |
+| `compileSdk` | **36** |
+| Android Gradle Plugin (AGP) | **9.1.1** |
+| Kotlin | **2.3.21** |
+| Gradle | **9.3.1** |
+| Java / JVM target | **11** or above |
 | Camera permission | The SDK asks the user for it during capture; you don't need to request it yourself |
+
+<details markdown="1">
+<summary>Where do I set these?</summary>
+
+```toml
+# gradle/libs.versions.toml
+[versions]
+agp = "9.1.1"
+kotlin = "2.3.21"
+```
+
+```properties
+# gradle/wrapper/gradle-wrapper.properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-bin.zip
+```
+
+```kotlin
+// app/build.gradle.kts
+android {
+    compileSdk = 36
+    defaultConfig { minSdk = 28 }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+```
+</details>
 
 Add the SDK repository in `settings.gradle.kts`:
 
