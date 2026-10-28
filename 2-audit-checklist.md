@@ -6,10 +6,24 @@ title: "2. Audit checklist"
 
 # 2. Audit checklist
 
-Two simple lists:
+Three things to know:
 
-1. **What the SDK already checks** — you get this for free, nothing to build.
-2. **What you must take care of** — the SDK cannot do these for you, and an auditor will ask about them.
+1. **You need a security audit report first** — no report, no integration key.
+2. **What the SDK already checks** — you get this for free, nothing to build.
+3. **What your app must do** — the SDK cannot do these for you, and the auditor will check them.
+
+---
+
+## Before you get your key — Security Audit Report
+
+Before UIDAI issues your integration key, you must submit a **Security Audit Report** of your app that includes both:
+
+- **SAST** (Static testing) — a scan of your app's code.
+- **DAST** (Dynamic testing) — a test of your running app.
+
+The report must show that your app has the controls in [Part 2](#part-2--what-you-must-take-care-of). **Approval is held until the report is reviewed and accepted.**
+
+> 🔁 If you later **remove a control**, **lower your Play Integrity level**, or **add a third-party SDK that loads code at runtime**, you must tell UIDAI **before** releasing that version.
 
 ---
 
@@ -56,9 +70,27 @@ The phone checks run automatically during registration and every time you call `
 - [ ] Aadhaar numbers are **not written to app logs** (Logcat) or crash reports.
 - [ ] The user is told **why** their face is being captured and **agrees** before you start (consent screen).
 
+### 🛡️ App security controls (checked in your audit report)
+
+Your own app must have these too — not just the SDK.
+
+| Control | In simple words |
+|---|---|
+| **Play Integrity** | Get a verdict each session and check it **on your server**. Minimum `MEETS_DEVICE_INTEGRITY`; `MEETS_STRONG_INTEGRITY` recommended. |
+| **Root detection** | Detect rooted phones (su, Magisk, Zygisk, KernelSU) in **native (JNI) code** — Java-only checks are not enough. |
+| **Debugger detection** | Release build is not debuggable, and you check at runtime that no debugger is attached. |
+| **Developer options / USB debugging** | Detect both. USB debugging on during capture = fail. |
+| **Hooking detection** | Detect Frida, Xposed / LSPosed, Substrate. |
+| **Emulators & clones** | Block emulators, cloud phones and "dual app / parallel space" clones. |
+| **App signature check** | At runtime, check your APK's signing certificate matches the real one, so a re-signed copy won't run. |
+| **Screen protection** | Use `FLAG_SECURE` on capture and result screens (no screenshots or recording). Ignore taps when another app draws over yours (tapjacking). |
+| **Mock location & VPN** | If your flow uses location, detect fake GPS apps and active VPN / proxy. |
+| **Secure network** | TLS 1.2+, no plain HTTP (`cleartextTrafficPermitted=false`), no debug overrides, and **certificate pinning** for SDK-facing endpoints. |
+| **Hard to reverse-engineer** | Code shrinking + obfuscation (R8), encrypted sensitive strings, security logic in native code. |
+| **No sensitive logs or backups** | Never write face data, PID, keys or tokens to Logcat, crash reports, analytics or disk. Strip logs from release builds. Set `android:allowBackup="false"`. |
+
 ### 📱 Your app
 - [ ] Release build uses `Environment.PROD`. Test builds never point to production.
-- [ ] Release build is **not debuggable** and is **obfuscated** (R8/ProGuard on).
 - [ ] You show the user a **friendly message** for each error (see [Error codes](4-error-codes.md)) — not a raw code alone.
 - [ ] When you get error **410** (registration expired), you run registration again (see [API guide](3-api-guide.md#when-registration-expires-error-410)).
 
@@ -83,7 +115,7 @@ Try each of these on a test phone. Each one **should fail** with the code shown:
 
 If all of these fail the way they should, the device-side part of your audit is in good shape.
 
-> ℹ️ This page lists what the SDK enforces and common good practice. The **official audit list comes from UIDAI and your AUA agreement** — always follow that if anything differs.
+> ℹ️ If anything here differs from your AUA agreement or the latest UIDAI guidance, **follow UIDAI**.
 
 ---
 

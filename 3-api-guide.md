@@ -142,7 +142,17 @@ progressCallback = object : InitializationProgressCallback {
 
 ## Step 5 — Authenticate the user
 
-There are **two ways** to use it. Pick the one you need.
+First, pick what you need. Two settings decide everything:
+
+| I want to… | `generatePid` | `skipFaceMatching` | You get |
+|---|---|---|---|
+| **Get a PID for Aadhaar auth** (no photo to compare) | `true` | `true` | `onPIDReady` |
+| **Check the face matches my photo**, and then get a PID | `true` | `false` | `onSuccess`, then `onPIDReady` |
+| **Only check the face matches my photo** | `false` | `false` | `onSuccess` |
+
+If the face doesn't match, you get `onFailure` with code **760** and no PID.
+
+The two most common ones:
 
 ### Option A — Get a PID block for Aadhaar authentication *(most common)*
 
@@ -191,6 +201,14 @@ val callback = object : AuthenticationCallback {
 
 > Callbacks may arrive on a background thread. Wrap UI updates in `runOnUiThread { }`.
 
+### ⚠️ Send the PID block exactly as you got it
+
+The PID block is **locked** — encrypted so only UIDAI can open it, and signed by the phone's secure key.
+
+- **Don't change it in any way** — no reformatting, pretty-printing, re-serialising or adding fields. Even one changed character breaks the signature, and UIDAI rejects it.
+- **Send it right away.** It can be used **once** and **expires in about 5 minutes**.
+- **Don't log it, cache it or save it** anywhere.
+
 ---
 
 ## `AuthParams` — the settings that matter
@@ -210,7 +228,7 @@ val callback = object : AuthenticationCallback {
 
 ## When registration expires (error 410)
 
-The phone's registration certificate has an end date. When it passes, `startAuthentication` fails with **410**. Fix:
+The certificate UIDAI gives the phone at registration is valid for **365 days**. After that, `startAuthentication` fails with **410**. Fix:
 
 ```kotlin
 FaceAuthSDK.clearRegistration(context)

@@ -45,7 +45,8 @@ You will also need your usual **Aadhaar authentication flow** on the server to s
 | Need | Minimum |
 |---|---|
 | Android version | **Android 9 (API 28)** or newer |
-| Camera | Front camera |
+| Camera | Front camera, **5 MP or more** (sharper = better match and liveness) |
+| Free memory (RAM) | About **500 MB free** — the face model needs it. Too little and `init()` fails |
 | Google Play Services | Installed and up to date |
 | Internet | Needed for registration, first-time setup, and sending results |
 | Phone state | Not rooted, not an emulator, USB debugging **off**, developer options **off** |
@@ -96,9 +97,27 @@ android {
 ```
 </details>
 
-Add the SDK repository in `settings.gradle.kts`:
+### Get access to the SDK
+
+UIDAI support gives your organisation a **GitHub username** and a **token** (with `read:packages` permission).
+
+Put them in `local.properties` in your project's root folder:
+
+```properties
+GITHUB_USER=your_github_username
+GITHUB_TOKEN=your_github_token
+```
+
+> 🔒 **Never commit this file.** Make sure your `.gitignore` has `local.properties`, `*.jks` and `*.keystore`. A leaked token lets anyone download the private SDK.
+
+Then add the SDK repository in `settings.gradle.kts`:
 
 ```kotlin
+val localProps = java.util.Properties().apply {
+    val f = File(settingsDir, "local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
 dependencyResolutionManagement {
     repositories {
         google()
@@ -106,13 +125,43 @@ dependencyResolutionManagement {
         maven {
             url = uri("https://maven.pkg.github.com/UIDAITechCenter/FaceRdOfflineAuthSDK")
             credentials {
-                username = "<your GitHub user>"     // keep these in local.properties,
-                password = "<your GitHub token>"    // never commit them
+                username = localProps.getProperty("GITHUB_USER") ?: System.getenv("GITHUB_USER")
+                password = localProps.getProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
 }
 ```
+
+<details markdown="1">
+<summary>Using Groovy (<code>settings.gradle</code>) instead?</summary>
+
+```groovy
+def localProps = new Properties()
+def f = new File(settingsDir, 'local.properties')
+if (f.exists()) f.withInputStream { localProps.load(it) }
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://maven.pkg.github.com/UIDAITechCenter/FaceRdOfflineAuthSDK'
+            credentials {
+                username = localProps.getProperty('GITHUB_USER') ?: System.getenv('GITHUB_USER')
+                password = localProps.getProperty('GITHUB_TOKEN') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
+    }
+}
+```
+
+And in `app/build.gradle`:
+
+```groovy
+implementation 'com.uidai.faceauth:face-auth-sdk:1.2.4'
+```
+</details>
 
 Add the dependency in `app/build.gradle.kts`:
 
@@ -121,6 +170,14 @@ dependencies {
     implementation("com.uidai.faceauth:face-auth-sdk:1.2.4")   // use the latest version you were given
 }
 ```
+
+Now run **Gradle Sync**. If it fails:
+
+| You see | Why | Fix |
+|---|---|---|
+| `401 Unauthorized` | Username or token is wrong or missing | Check `local.properties`. The token needs `read:packages`. |
+| `404 Not Found` | Wrong URL, or your account has no access yet | Check the URL. Ask UIDAI support to confirm your access. |
+| `Could not resolve` | Gradle can't find `local.properties` | Put it in the **project root** (next to `settings.gradle.kts`), not inside `app/`. |
 
 ---
 
