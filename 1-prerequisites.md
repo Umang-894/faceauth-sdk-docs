@@ -67,7 +67,7 @@ The SDK is built and tested with the versions below. Use the same or newer in yo
 | Kotlin | **2.3.21** |
 | Gradle | **9.3.1** |
 | Java / JVM target | **11** or above |
-| Camera permission | The SDK asks the user for it during capture; you don't need to request it yourself |
+| Permissions (`CAMERA`, `INTERNET`) | **Nothing to do.** The SDK declares them, and Android adds them to your app's manifest automatically when you build. The SDK also shows the "Allow camera?" popup itself. If the user says no, you get error **915**. |
 
 <details markdown="1">
 <summary>Where do I set these?</summary>
