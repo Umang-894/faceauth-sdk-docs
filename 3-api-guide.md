@@ -201,9 +201,37 @@ val callback = object : AuthenticationCallback {
 
 > Callbacks may arrive on a background thread. Wrap UI updates in `runOnUiThread { }`.
 
-### ⚠️ Send the PID block exactly as you got it
+### 📦 What is the PID block?
 
-The PID block is **locked** — encrypted so only UIDAI can open it, and signed by the phone's secure key.
+**PID = Personal Identity Data.** Think of it as a **sealed envelope**: the user's face is put inside, the envelope is locked so only UIDAI can open it, and the phone puts its signature on it. Your app just carries the envelope to UIDAI — it can't (and shouldn't) open it.
+
+You get it in `onPIDReady(pidResult)` in two formats — use whichever your server expects:
+
+| Field | What it is |
+|---|---|
+| `pidResult.xml` | The PID block as XML |
+| `pidResult.json` | The same PID block as JSON |
+
+**What's inside the envelope (5 parts):**
+
+| Part | In simple words |
+|---|---|
+| `Skey` | A one-time key that locks the face data. The key itself is locked with **UIDAI's public certificate**, so only UIDAI can unlock it. `ci` tells UIDAI which certificate was used. |
+| `Hmac` | A fingerprint of the data. If anyone changes even one character, the fingerprint won't match and UIDAI rejects it. |
+| `Data` | The **face data itself**, encrypted (AES-GCM). Type is always `X` (XML). |
+| `DeviceInfo` | Who made it: your AUA code (`dpId`), your app's package and version (`rdsId`, `rdsVer`), the phone's ID (`dc`), SDK version (`mi`), and the phone's public key (`mc`). |
+| `Resp` | Capture details: image quality score (`qScore`) and what was captured (`pCount = 1` face, `pType = 3`). Finger and iris counts are `0`. |
+
+**How it is protected:**
+
+| Protection | What it means |
+|---|---|
+| 🔒 **Encrypted** | Only UIDAI's secure servers (HSM) can open it. |
+| ✍️ **Signed** | Signed by the phone's private key, which never leaves the phone's secure hardware. UIDAI checks it against the key from registration. |
+| ⏱️ **Single use** | Has a one-time value and a timestamp. UIDAI rejects it if it's sent twice or after about 5 minutes. |
+| 📭 **Sealed** | Your app can't read what's inside — and doesn't need to. |
+
+### ⚠️ Send the PID block exactly as you got it
 
 - **Don't change it in any way** — no reformatting, pretty-printing, re-serialising or adding fields. Even one changed character breaks the signature, and UIDAI rejects it.
 - **Send it right away.** It can be used **once** and **expires in about 5 minutes**.
